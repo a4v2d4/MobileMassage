@@ -648,7 +648,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
   }
+  .mobile-float.visible { transform: translateY(0); }
   .mobile-float-book {
     flex: 1;
     display: block;
@@ -1062,6 +1065,17 @@
   <p>&copy; 2025 Sonoma Bodyworks &middot; <a href="tel:7079398841">707-939-8841</a> &middot; Napa &amp; Sonoma Wine Country</p>
 </footer>
 
+<!-- FLOATING MOBILE CTA -->
+<div class="mobile-float" aria-label="Quick contact">
+  <a href="tel:7079398841" class="mobile-float-call">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/>
+    </svg>
+    707-939-8841
+  </a>
+  <a href="#contact" class="mobile-float-book">Book Now</a>
+</div>
+
 <script>
   // Nav scroll state
   const nav = document.getElementById('mainNav');
@@ -1085,17 +1099,19 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
   }, { threshold: 0.15 });
   testimonials.forEach(t => io.observe(t));
+
+  // Floating mobile bar — show once hero "Book a Treatment" button scrolls out of view
+  const heroBtn = document.querySelector('.hero-actions .btn-primary');
+  const mobileFloat = document.querySelector('.mobile-float');
+  if (heroBtn && mobileFloat) {
+    const floatObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        mobileFloat.classList.toggle('visible', !e.isIntersecting);
+      });
+    }, { threshold: 0 });
+    floatObserver.observe(heroBtn);
+  }
 </script>
-<!-- FLOATING MOBILE CTA -->
-<div class="mobile-float" aria-label="Quick contact">
-  <a href="tel:7079398841" class="mobile-float-call">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/>
-    </svg>
-    707-939-8841
-  </a>
-  <a href="#contact" class="mobile-float-book">Book Now</a>
-</div>
 
 </body>
 </html>
