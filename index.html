@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sonoma Bodyworks | Mobile Massage · Napa & Sonoma Wine Country</title>
+<meta name="description" content="Mobile massage therapists serving Napa and Sonoma Wine Country. In-home massage at your vacation rental, residence, or hotel. Groups welcome." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ── TOKENS ── */
+  :root {
+    --sage:       #3d5a47;
+    --sage-light: #5a7a61;
+    --stone:      #f5f0e8;
+    --cream:      #faf7f2;
+    --dust:       #c4a882;
+    --rose:       #c47e6e;
+    --ink:        #1e2922;
+    --mist:       #e8e2d8;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body:    'DM Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 300;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 3rem;
+    transition: background 0.4s, box-shadow 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(250,247,242,0.96);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 var(--mist);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--cream);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: color 0.3s;
+  }
+  nav.scrolled .nav-logo { color: var(--sage); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-weight: 400;
+    transition: color 0.25s;
+  }
+  nav.scrolled .nav-links a { color: var(--sage); }
+  .nav-links a:hover { color: var(--dust); }
+
+  .nav-cta {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 0.55rem 1.4rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.25s, border-color 0.25s, color 0.25s;
+  }
+  nav.scrolled .nav-cta {
+    border-color: var(--sage);
+    color: var(--sage);
+  }
+  .nav-cta:hover {
+    background: var(--dust);
+    border-color: var(--dust);
+    color: white !important;
+  }
+
+  .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 24px; height: 2px; background: white; transition: background 0.3s; }
+  nav.scrolled .hamburger span { background: var(--sage); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  /* Signature: the shifting golden-hour gradient – the one memorable element */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(160deg,
+        rgba(61,90,71,0.82) 0%,
+        rgba(30,41,34,0.72) 40%,
+        rgba(196,168,130,0.55) 75%,
+        rgba(196,126,110,0.45) 100%
+      ),
+      url('https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=1800&q=80') center/cover no-repeat;
+    animation: goldenhour 14s ease-in-out infinite alternate;
+  }
+
+  @keyframes goldenhour {
+    0%   { filter: saturate(1.0) brightness(0.92); }
+    50%  { filter: saturate(1.2) brightness(1.04); }
+    100% { filter: saturate(0.9) brightness(0.88); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 2rem;
+    max-width: 760px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dust);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 6vw, 4.4rem);
+    font-weight: 400;
+    color: white;
+    line-height: 1.18;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--dust);
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.8);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    background: var(--rose);
+    color: white;
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-radius: 2px;
+    transition: background 0.25s, transform 0.2s;
+  }
+  .btn-primary:hover { background: #b56c5c; transform: translateY(-1px); }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 400;
+    border-radius: 2px;
+    transition: border-color 0.25s, background 0.25s;
+  }
+  .btn-ghost:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    animation: bounce 2.5s ease-in-out infinite;
+  }
+  .hero-scroll svg { width: 18px; opacity: 0.6; }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%       { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 6rem 2rem; }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dust);
+    font-weight: 500;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--sage);
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title em { font-style: italic; color: var(--rose); }
+
+  /* ── INTRO BAND ── */
+  .intro {
+    background: var(--sage);
+    padding: 5rem 2rem;
+  }
+  .intro .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  .intro .section-title { color: var(--stone); }
+  .intro-body {
+    color: rgba(245,240,232,0.8);
+    font-size: 1.0rem;
+    line-height: 1.8;
+  }
+  .intro-body p + p { margin-top: 1rem; }
+  .intro-stat-row {
+    display: flex;
+    gap: 3rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(245,240,232,0.15);
+  }
+  .intro-stat strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--dust);
+    line-height: 1;
+  }
+  .intro-stat span {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.55);
+  }
+
+  /* ── SERVICES ── */
+  .services { background: var(--cream); }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 3.5rem;
+    background: var(--mist);
+  }
+  .service-card {
+    background: var(--cream);
+    padding: 2.8rem 2.2rem;
+    transition: background 0.3s;
+  }
+  .service-card:hover { background: var(--stone); }
+  .service-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1.4rem;
+    color: var(--dust);
+  }
+  .service-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--sage);
+    margin-bottom: 0.8rem;
+  }
+  .service-card p {
+    font-size: 0.9rem;
+    color: #5a5a50;
+    line-height: 1.7;
+  }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials { background: var(--stone); }
+  .testimonials-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .testimonial {
+    background: white;
+    padding: 2.2rem;
+    border-radius: 2px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .testimonial.visible { opacity: 1; transform: none; }
+  .testimonial:nth-child(2) { transition-delay: 0.12s; }
+  .testimonial:nth-child(3) { transition-delay: 0.24s; }
+
+  .testimonial-stars {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 1rem;
+    color: var(--dust);
+  }
+  .testimonial blockquote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.0rem;
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+  .testimonial cite {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dust);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ── SERVICE AREA ── */
+  .area { background: var(--cream); }
+  .area .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  .area-towns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+  .town-tag {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--mist);
+    border-radius: 100px;
+    color: #5a5a50;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .town-tag:hover { border-color: var(--sage); color: var(--sage); }
+  .area-image {
+    position: relative;
+    height: 460px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .area-image img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .area-image-caption {
+    position: absolute;
+    bottom: 1.5rem; left: 1.5rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    background: rgba(30,41,34,0.5);
+    backdrop-filter: blur(4px);
+    padding: 0.4rem 0.8rem;
+    border-radius: 2px;
+  }
+
+  /* ── CONTACT ── */
+  .contact {
+    background: var(--sage);
+    text-align: center;
+    padding: 7rem 2rem;
+  }
+  .contact .section-title { color: white; }
+  .contact-sub {
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 2.5rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.0rem;
+    line-height: 1.7;
+  }
+  .contact-details {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+  }
+  .contact-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .contact-item-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dust);
+  }
+  .contact-item a, .contact-item span {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 400;
+    transition: color 0.2s;
+  }
+  .contact-item a:hover { color: var(--dust); }
+
+  .btn-light {
+    display: inline-block;
+    padding: 0.9rem 2.5rem;
+    background: var(--dust);
+    color: white;
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-radius: 2px;
+    transition: background 0.25s;
+  }
+  .btn-light:hover { background: #b09262; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    padding: 2.5rem;
+    text-align: center;
+  }
+  footer p {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.06em;
+  }
+  footer a { color: rgba(255,255,255,0.45); text-decoration: none; }
+  footer a:hover { color: var(--dust); }
+
+  /* ── MOBILE NAV MENU ── */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--sage);
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 400;
+  }
+  .mobile-close {
+    position: absolute;
+    top: 1.5rem; right: 2rem;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .nav-links { display: none; }
+    .nav-cta { display: none; }
+    .hamburger { display: flex; }
+
+    .intro .container,
+    .area .container { grid-template-columns: 1fr; gap: 3rem; }
+    .intro .container > *:first-child { order: 1; }
+    .services-grid { grid-template-columns: 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .area-image { height: 280px; }
+    section { padding: 4rem 1.5rem; }
+    .intro { padding: 4rem 1.5rem; }
+    .intro-stat-row { gap: 2rem; }
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2.2rem; }
+    .hero-actions { flex-direction: column; align-items: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-bg { animation: none; }
+    .testimonial { opacity: 1; transform: none; }
+    .hero-scroll { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="closeMobileMenu()" aria-label="Close menu">×</button>
+  <a href="#services" onclick="closeMobileMenu()">Services</a>
+  <a href="#about" onclick="closeMobileMenu()">About</a>
+  <a href="#area" onclick="closeMobileMenu()">Service Area</a>
+  <a href="#contact" onclick="closeMobileMenu()">Book Now</a>
+</div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="#" class="nav-logo">Sonoma Bodyworks</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#area">Service Area</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Book Now</a>
+  <div class="hamburger" onclick="openMobileMenu()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Napa &amp; Sonoma Wine Country</p>
+    <h1>Massage that <em>comes to you</em></h1>
+    <p class="hero-sub">
+      Professional mobile massage therapists at your vacation rental, residence, or hotel — so you never have to leave the bliss.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Book a Treatment</a>
+      <a href="#services" class="btn-ghost">Explore Services</a>
+    </div>
+  </div>
+  <div class="hero-scroll" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+    Scroll
+  </div>
+</section>
+
+<!-- INTRO -->
+<section class="intro" id="about">
+  <div class="container">
+    <div>
+      <span class="section-eyebrow">Why Sonoma Bodyworks</span>
+      <h2 class="section-title">Professional. Dependable.<br><em>Exceptionally skilled.</em></h2>
+    </div>
+    <div>
+      <div class="intro-body">
+        <p>Ellie and her team of licensed massage therapists bring the spa to you — whether you're unwinding at a vineyard rental after a day of tastings, celebrating a special occasion with friends, or simply want the luxury of a great massage without driving anywhere.</p>
+        <p>We specialize in groups. Multiple therapists, perfectly coordinated, so everyone experiences the same quality at the same time.</p>
+      </div>
+      <div class="intro-stat-row">
+        <div class="intro-stat">
+          <strong>15+</strong>
+          <span>Years serving Wine Country</span>
+        </div>
+        <div class="intro-stat">
+          <strong>20+</strong>
+          <span>Towns &amp; communities</span>
+        </div>
+        <div class="intro-stat">
+          <strong>5★</strong>
+          <span>Consistently rated</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="container">
+    <span class="section-eyebrow">What We Offer</span>
+    <h2 class="section-title">Every treatment,<br>at your door</h2>
+    <div class="services-grid">
+
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M20 8c-6.6 0-12 5.4-12 12s5.4 12 12 12 12-5.4 12-12S26.6 8 20 8z"/>
+          <path d="M14 20c1.5-3 3.5-5 6-5s4.5 2 6 5"/>
+          <path d="M16 24c1-1.5 2.4-2 4-2s3 .5 4 2"/>
+        </svg>
+        <h3>Swedish &amp; Deep Tissue</h3>
+        <p>From gentle relaxation to firm therapeutic work — tailored to exactly what your body needs that day. Our therapists check in with you throughout.</p>
+      </div>
+
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="8" y="14" width="24" height="14" rx="2"/>
+          <path d="M14 14v-2a6 6 0 0112 0v2"/>
+          <circle cx="20" cy="21" r="2"/>
+        </svg>
+        <h3>Group Massage</h3>
+        <p>Our specialty. Multiple therapists arrive together so your whole group — bachelorette party, family retreat, corporate team — gets treated simultaneously.</p>
+      </div>
+
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M12 28c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+          <circle cx="20" cy="16" r="5"/>
+          <path d="M8 35h24"/>
+        </svg>
+        <h3>Facials &amp; Skincare</h3>
+        <p>Rejuvenating facial treatments brought to your rental. Pair with a massage for a complete spa day without leaving your private outdoor space.</p>
+      </div>
+
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M20 8v6M20 26v6M8 20h6M26 20h6"/>
+          <path d="M12.7 12.7l4.2 4.2M23.1 23.1l4.2 4.2M12.7 27.3l4.2-4.2M23.1 16.9l4.2-4.2"/>
+          <circle cx="20" cy="20" r="4"/>
+        </svg>
+        <h3>Yoga Sessions</h3>
+        <p>Private or group yoga at your vacation rental, guided by our certified instructors. Perfect as a morning ritual or a gentle cool-down after a day in the vineyards.</p>
+      </div>
+
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="8" y="18" width="24" height="4" rx="2"/>
+          <path d="M14 18v-4a2 2 0 014 0v4M22 18v-4a2 2 0 014 0v4"/>
+          <path d="M8 22v4a4 4 0 004 4h16a4 4 0 004-4v-4"/>
+        </svg>
+        <h3>Chair Massage</h3>
+        <p>On-site chair massage for corporate teams and events. Invigorating 15–30 minute sessions that boost morale without employees needing to change clothes.</p>
+      </div>
+
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M20 10c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10"/>
+          <path d="M28 10l2-2M30 10h-2v2"/>
+          <path d="M16 20h8M20 16v8"/>
+        </svg>
+        <h3>Custom Packages</h3>
+        <p>Planning something special? We'll design a multi-treatment package around your group's size, schedule, and preferences. Call us to discuss.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="container">
+    <div class="testimonials-header">
+      <div>
+        <span class="section-eyebrow">What guests say</span>
+        <h2 class="section-title">From our clients</h2>
+      </div>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <blockquote>"Ellie and her team are as incredible as they come. Extremely professional, communicative, always on time — and the best massages I've ever had."</blockquote>
+        <cite>Lauren K. &middot; Piedmont, CA</cite>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <blockquote>"Easy to book, and having massages in Wine Country while on vacation is just wonderful. We will absolutely be booking again when we're back in Glen Ellen."</blockquote>
+        <cite>Ursula A. &middot; Berkeley, CA</cite>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <blockquote>"The mobile massage therapists were exceptional. Afterward, relaxing in the hot tub at our rental was pure bliss. Highly recommended for a heavenly Sonoma retreat."</blockquote>
+        <cite>Jennifer A. &middot; Calistoga, CA</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE AREA -->
+<section class="area" id="area">
+  <div class="container">
+    <div>
+      <span class="section-eyebrow">Where We Travel</span>
+      <h2 class="section-title">We come to<br><em>Wine Country</em></h2>
+      <p style="font-size:0.95rem; color:#5a5a50; line-height:1.75; margin-bottom:1.5rem;">
+        Our therapists travel throughout Napa Valley and Sonoma County — wherever you're staying. If your destination isn't listed, just call us.
+      </p>
+      <div class="area-towns">
+        <span class="town-tag">Sonoma</span>
+        <span class="town-tag">Glen Ellen</span>
+        <span class="town-tag">Kenwood</span>
+        <span class="town-tag">Healdsburg</span>
+        <span class="town-tag">Santa Rosa</span>
+        <span class="town-tag">Sebastopol</span>
+        <span class="town-tag">Petaluma</span>
+        <span class="town-tag">Windsor</span>
+        <span class="town-tag">Geyserville</span>
+        <span class="town-tag">Calistoga</span>
+        <span class="town-tag">St. Helena</span>
+        <span class="town-tag">Yountville</span>
+        <span class="town-tag">Napa</span>
+        <span class="town-tag">& beyond</span>
+      </div>
+    </div>
+    <div class="area-image">
+      <img
+        src="https://images.unsplash.com/photo-1543076498-4a651e23c0f4?w=900&q=80"
+        alt="Sonoma vineyard landscape"
+        loading="lazy"
+      />
+      <span class="area-image-caption">Sonoma Valley, California</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT / BOOK -->
+<section class="contact" id="contact">
+  <div class="container">
+    <span class="section-eyebrow">Get in Touch</span>
+    <h2 class="section-title" style="color:white;">Ready to relax?</h2>
+    <p class="contact-sub">
+      Book a single session or plan a full group spa experience. We make it easy — just reach out and we'll handle the rest.
+    </p>
+    <a href="tel:7079398841" class="btn-light">Call to Book · 707-939-8841</a>
+    <div class="contact-details">
+      <div class="contact-item">
+        <span class="contact-item-label">Phone</span>
+        <a href="tel:7079398841">707-939-8841</a>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item-label">Email</span>
+        <a href="mailto:healingarts777@gmail.com">healingarts777@gmail.com</a>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item-label">Service Area</span>
+        <span>Napa &amp; Sonoma Counties</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2025 Sonoma Bodyworks &middot; <a href="tel:7079398841">707-939-8841</a> &middot; Napa &amp; Sonoma Wine Country</p>
+</footer>
+
+<script>
+  // Nav scroll state
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+  // Mobile menu
+  function openMobileMenu() {
+    document.getElementById('mobileMenu').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileMenu() {
+    document.getElementById('mobileMenu').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Testimonial scroll reveal
+  const testimonials = document.querySelectorAll('.testimonial');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  testimonials.forEach(t => io.observe(t));
+</script>
+</body>
+</html>
