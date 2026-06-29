@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 const BRAND = {
   sage: "#7A9E7E",
@@ -24,12 +24,23 @@ const MONTHS = ["January","February","March","April","May","June","July","August
 
 function getDaysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
 function getFirstDay(y,m){ return new Date(y,m,1).getDay(); }
+function postLabel(date,time){
+  return new Date(`${date}T${time}`).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+}
+function hydratePost(post){
+  return {
+    ...post,
+    photo: post.photo || post.imageUrl,
+    datetime: new Date(post.scheduledAt || `${post.date}T${post.time}`),
+    label: post.label || postLabel(post.date, post.time),
+  };
+}
 
 // ── Modal ──────────────────────────────────────────────────────────────────────
-function Modal({ onClose, children }) {
+function Modal({ onClose, children, maxWidth = 560 }) {
   return (
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(44,32,24,0.45)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-      <div onClick={e=>e.stopPropagation()} style={{background:BRAND.warm,borderRadius:16,width:"100%",maxWidth:560,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 8px 40px rgba(0,0,0,0.2)"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:BRAND.warm,borderRadius:16,width:"100%",maxWidth,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 8px 40px rgba(0,0,0,0.2)"}}>
         {children}
       </div>
     </div>
@@ -48,6 +59,8 @@ function Composer({ initialDate, onSave, onClose }) {
   const [date, setDate] = useState(initialDate || "");
   const [time, setTime] = useState("09:00");
   const [dragging, setDragging] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const fileRef = useRef();
 
   const handleFile = (file) => {
@@ -66,16 +79,13 @@ function Composer({ initialDate, onSave, onClose }) {
     try {
       const base64 = photo.split(",")[1];
       const mediaType = photoFile?.type || "image/jpeg";
-      const sys = `You are a social media copywriter for Sonoma Bodyworks, a massage studio in Sonoma County, CA. Write warm, grounded Instagram captions — calm, nurturing, never corporate. 2-3 short paragraphs. End with a gentle CTA. Do NOT include hashtags.`;
-      const usr = notes ? `Write a caption for this photo. Context: "${notes}"` : "Write an Instagram caption for this bodywork studio photo.";
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
+      const res = await fetch("/api/generate-caption",{
         method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, system:sys,
-          messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:mediaType,data:base64}},{type:"text",text:usr}]}]
-        })
+        body:JSON.stringify({ image:base64, mediaType, notes })
       });
       const data = await res.json();
-      const text = data.content?.find(b=>b.type==="text")?.text || "";
+      if (!res.ok) throw new Error(data?.error || "Couldn't generate.");
+      const text = data.caption || "";
       setCaption(text+"\n\n"+pickHashtags());
     } catch { setAiError("Couldn't generate — try again."); }
     finally { setAiLoading(false); }
@@ -83,12 +93,24 @@ function Composer({ initialDate, onSave, onClose }) {
 
   const canSave = photo && caption.trim() && date && time;
 
-  const save = () => {
-    if (!canSave) return;
-    onSave({ id: Date.now(), photo, caption, date, time,
-      datetime: new Date(`${date}T${time}`),
-      label: new Date(`${date}T${time}`).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})
-    });
+  const save = async () => {
+    if (!canSave || saving) return;
+    setSaving(true);
+    setSaveError("");
+    try {
+      await onSave({
+        photo,
+        photoFile,
+        caption,
+        date,
+        time,
+        scheduledAt: new Date(`${date}T${time}`).toISOString(),
+      });
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save this post.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -109,7 +131,7 @@ function Composer({ initialDate, onSave, onClose }) {
           padding:photo?"4px":"32px 20px",textAlign:"center",cursor:"pointer",marginBottom:16,transition:"all .2s",overflow:"hidden"}}
       >
         {photo
-          ? <img src={photo} alt="preview" style={{width:"100%",maxHeight:220,objectFit:"cover",borderRadius:8,display:"block"}}/>
+          ? <img src={photo} alt="preview" style={{width:"100%",maxHeight:"45vh",objectFit:"contain",borderRadius:8,display:"block",background:BRAND.warm}}/>
           : <div><div style={{fontSize:32,marginBottom:8}}>🌿</div>
               <div style={{color:BRAND.earth,fontSize:14,marginBottom:4}}>Drop photo or click to browse</div>
               <div style={{color:BRAND.sub,fontSize:11,fontFamily:"sans-serif"}}>JPG · PNG · HEIC</div>
@@ -178,10 +200,11 @@ function Composer({ initialDate, onSave, onClose }) {
       </div>
       <div style={{fontSize:11,fontFamily:"sans-serif",color:BRAND.sub,marginBottom:16}}>💡 Best times: Tue–Thu 9–11am or 6–8pm</div>
 
-      <button onClick={save} disabled={!canSave}
-        style={{width:"100%",background:canSave?BRAND.earth:BRAND.stone,color:"white",border:"none",borderRadius:8,
-          padding:"13px",fontSize:14,fontFamily:"sans-serif",cursor:canSave?"pointer":"default",letterSpacing:"0.04em"}}>
-        Add to Calendar
+      {saveError && <div style={{color:"#c0392b",fontSize:12,fontFamily:"sans-serif",marginBottom:10}}>{saveError}</div>}
+      <button onClick={save} disabled={!canSave||saving}
+        style={{width:"100%",background:canSave&&!saving?BRAND.earth:BRAND.stone,color:"white",border:"none",borderRadius:8,
+          padding:"13px",fontSize:14,fontFamily:"sans-serif",cursor:canSave&&!saving?"pointer":"default",letterSpacing:"0.04em"}}>
+        {saving ? "Saving..." : "Add to Calendar"}
       </button>
     </div>
   );
@@ -195,7 +218,7 @@ function PostDetail({ post, onDelete, onClose }) {
         <div style={{fontSize:13,fontFamily:"sans-serif",color:BRAND.sage,fontWeight:"bold"}}>📅 {post.label}</div>
         <button onClick={onClose} style={{background:"none",border:"none",color:BRAND.sub,fontSize:22,cursor:"pointer",lineHeight:1}}>×</button>
       </div>
-      <img src={post.photo} alt="" style={{width:"100%",maxHeight:260,objectFit:"cover",borderRadius:10,marginBottom:14}}/>
+      <img src={post.photo} alt="" style={{width:"100%",maxHeight:"68vh",objectFit:"contain",borderRadius:10,marginBottom:14,display:"block",background:BRAND.cream}}/>
       <div style={{background:BRAND.cream,borderRadius:8,padding:"12px 14px",fontSize:13,fontFamily:"sans-serif",color:BRAND.text,lineHeight:1.7,marginBottom:16,whiteSpace:"pre-wrap"}}>
         {post.caption}
       </div>
@@ -213,11 +236,79 @@ export default function SonomaInstagram() {
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [scheduled, setScheduled] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [backendError, setBackendError] = useState("");
   const [composerDate, setComposerDate] = useState(null); // null=closed, ""=no date, "YYYY-MM-DD"=prefilled
   const [detailPost, setDetailPost] = useState(null);
 
-  const addPost = (post) => { setScheduled(p=>[...p,post].sort((a,b)=>a.datetime-b.datetime)); setComposerDate(null); };
-  const deletePost = (id) => { setScheduled(p=>p.filter(x=>x.id!==id)); setDetailPost(null); };
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPosts() {
+      setLoadingPosts(true);
+      setBackendError("");
+      try {
+        const res = await fetch("/api/posts");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Could not load scheduled posts.");
+        if (!cancelled) setScheduled((data.posts || []).map(hydratePost));
+      } catch (error) {
+        if (!cancelled) setBackendError(error instanceof Error ? error.message : "Could not load scheduled posts.");
+      } finally {
+        if (!cancelled) setLoadingPosts(false);
+      }
+    }
+
+    loadPosts();
+    return () => { cancelled = true; };
+  }, []);
+
+  const addPost = async (post) => {
+    const base64 = post.photo.split(",")[1];
+    const uploadRes = await fetch("/api/upload-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        image: base64,
+        mediaType: post.photoFile?.type || "image/jpeg",
+        fileName: post.photoFile?.name || "post-image.jpg",
+      }),
+    });
+    const uploadData = await uploadRes.json();
+    if (!uploadRes.ok) throw new Error(uploadData?.error || "Could not upload image.");
+
+    const postRes = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        imageUrl: uploadData.url,
+        imagePathname: uploadData.pathname,
+        caption: post.caption,
+        date: post.date,
+        time: post.time,
+        scheduledAt: post.scheduledAt,
+      }),
+    });
+    const postData = await postRes.json();
+    if (!postRes.ok) throw new Error(postData?.error || "Could not save scheduled post.");
+
+    const savedPost = hydratePost(postData.post);
+    setScheduled(p=>[...p,savedPost].sort((a,b)=>a.datetime-b.datetime));
+    setComposerDate(null);
+  };
+
+  const deletePost = async (id) => {
+    setBackendError("");
+    try {
+      const res = await fetch(`/api/posts?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Could not remove post.");
+      setScheduled(p=>p.filter(x=>x.id!==id));
+      setDetailPost(null);
+    } catch (error) {
+      setBackendError(error instanceof Error ? error.message : "Could not remove post.");
+    }
+  };
 
   const prevMonth = () => { if(viewMonth===0){setViewMonth(11);setViewYear(y=>y-1);}else setViewMonth(m=>m-1); };
   const nextMonth = () => { if(viewMonth===11){setViewMonth(0);setViewYear(y=>y+1);}else setViewMonth(m=>m+1); };
@@ -263,6 +354,11 @@ export default function SonomaInstagram() {
       </div>
 
       <div style={{maxWidth:780,margin:"0 auto",padding:"28px 16px"}}>
+        {backendError && (
+          <div style={{background:"#fff8f6",border:"1px solid #e7b6ad",borderRadius:8,padding:"10px 12px",fontSize:12,fontFamily:"sans-serif",color:"#8f2f22",marginBottom:16}}>
+            {backendError}
+          </div>
+        )}
 
         {/* Calendar nav */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
@@ -339,7 +435,13 @@ export default function SonomaInstagram() {
           </div>
         )}
 
-        {scheduled.length===0 && (
+        {loadingPosts && (
+          <div style={{textAlign:"center",padding:"32px 20px",color:BRAND.sub,fontFamily:"sans-serif",fontSize:13}}>
+            Loading scheduled posts...
+          </div>
+        )}
+
+        {!loadingPosts && scheduled.length===0 && (
           <div style={{textAlign:"center",padding:"40px 20px",color:BRAND.sub,fontFamily:"sans-serif",fontSize:13}}>
             <div style={{fontSize:36,marginBottom:10}}>🌾</div>
             Click any day on the calendar to schedule your first post.
@@ -356,7 +458,7 @@ export default function SonomaInstagram() {
 
       {/* Post detail modal */}
       {detailPost && (
-        <Modal onClose={()=>setDetailPost(null)}>
+        <Modal onClose={()=>setDetailPost(null)} maxWidth={760}>
           <PostDetail post={detailPost} onDelete={deletePost} onClose={()=>setDetailPost(null)}/>
         </Modal>
       )}

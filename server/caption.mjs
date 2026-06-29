@@ -14,17 +14,8 @@ function fallbackCaption(notes) {
 When you are ready for a little more ease, book a session or send a DM to schedule.`;
 }
 
-function sendJson(res, status, body) {
-  res.writeHead(status, { "content-type": "application/json" });
-  res.end(JSON.stringify(body));
-}
-
-async function readJson(req) {
-  const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
-  const raw = Buffer.concat(chunks).toString("utf8");
-  return raw ? JSON.parse(raw) : {};
-}
+import { OpenRouter } from "@openrouter/sdk";
+import { readJson, sendJson } from "./http.mjs";
 
 export async function handleCaptionRequest(req, res) {
   if (req.method !== "POST") {
@@ -40,69 +31,61 @@ export async function handleCaptionRequest(req, res) {
       return;
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       sendJson(res, 200, {
         caption: fallbackCaption(notes),
-        warning: "Set ANTHROPIC_API_KEY in .env for live AI captions. This is a local draft.",
+        warning: "Set OPENROUTER_API_KEY in .env for live AI captions. This is a local draft.",
       });
       return;
     }
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
+    const mediaUrl = `data:${mediaType || "image/jpeg"};base64,${image}`;
+    const openrouter = new OpenRouter({ apiKey });
+    const response = await openrouter.chat.send({
+      chatRequest: {
+        model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
+        maxTokens: 1000,
         messages: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT,
+          },
           {
             role: "user",
             content: [
-              {
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: mediaType || "image/jpeg",
-                  data: image,
-                },
-              },
               {
                 type: "text",
                 text: notes
                   ? `Write an Instagram caption for this photo. Context from the business: "${notes}"`
                   : "Write an Instagram caption for this photo of our bodywork studio or services.",
               },
+              {
+                type: "image_url",
+                imageUrl: {
+                  url: mediaUrl,
+                },
+              },
             ],
           },
         ],
-      }),
+      },
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      sendJson(res, response.status, {
-        error: data?.error?.message || "Anthropic could not generate a caption.",
-      });
-      return;
-    }
-
-    const caption = data.content?.find((block) => block.type === "text")?.text;
+    const caption = response.choices?.[0]?.message?.content;
     if (!caption) {
-      sendJson(res, 502, { error: "Anthropic returned no caption text." });
+      sendJson(res, 502, { error: "OpenRouter returned no caption text." });
       return;
     }
 
     sendJson(res, 200, { caption });
   } catch (error) {
-    sendJson(res, 500, {
-      error: error instanceof Error ? error.message : "Could not generate caption.",
+    const statusCode = Number.isInteger(error?.statusCode) ? error.statusCode : 500;
+    const fallbackMessage =
+      statusCode === 500 ? "Could not generate caption." : "OpenRouter could not generate a caption.";
+
+    sendJson(res, statusCode, {
+      error: error instanceof Error ? error.message : fallbackMessage,
     });
   }
 }

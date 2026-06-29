@@ -2,6 +2,8 @@ import { createServer as createHttpServer } from "node:http";
 import { loadEnv } from "vite";
 import { createServer as createViteServer } from "vite";
 import { handleCaptionRequest } from "../server/caption.mjs";
+import { handlePostsRequest } from "../server/posts.mjs";
+import { handleUploadImageRequest } from "../server/upload-image.mjs";
 
 const root = process.cwd();
 const env = loadEnv("development", root, "");
@@ -22,6 +24,16 @@ const vite = await createViteServer({
 const server = createHttpServer(async (req, res) => {
   if (req.url?.startsWith("/api/generate-caption")) {
     await handleCaptionRequest(req, res);
+    return;
+  }
+
+  if (req.url?.startsWith("/api/upload-image")) {
+    await handleUploadImageRequest(req, res);
+    return;
+  }
+
+  if (req.url?.startsWith("/api/posts")) {
+    await handlePostsRequest(req, res);
     return;
   }
 
